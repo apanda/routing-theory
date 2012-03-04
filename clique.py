@@ -78,7 +78,7 @@ def CombineIterators(size):
         yield [routes[i] for i in route]
         carry = 1
         i = 1
-        while carry == 1 and i < routes_size:
+        while carry == 1 and i < size:
             carry = (route[i] + carry) / routes_size
             route[i] = (route[i] + 1) % routes_size
             i = i + 1
