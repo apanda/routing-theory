@@ -1,9 +1,9 @@
 #!/usr/bin/env python
-def CheckConnectivity(tables, links):
+def CheckConnectivity(tables, links, size):
     #for origin in xrange(0, 4):
     #    for dest in xrange(origin + 1, 4):
     dest = 0
-    for origin in xrange(1, 4):
+    for origin in xrange(1, size):
         #print str.format("Routing between {0} and {1}", origin, dest)
         visited = []
         visited_links = []
@@ -13,7 +13,7 @@ def CheckConnectivity(tables, links):
             next_hop = tables[current][inport][dest]
             edge = (min(current, next_hop), max(current, next_hop))
             #print str.format("Attempting edge {0}", edge)
-            if edge in links or edge[0] == edge[1]:
+            if edge[0] == edge[1] or links[edge]:
                 if next_hop == dest:
                     break
                 if next_hop in visited:
@@ -38,18 +38,18 @@ def GenerateClique(size):
             clique.append((i, j))
     return clique
 
-def CheckRoutingTable(tables, size):
-    clique = GenerateClique(size)
-    for i in xrange(0, len(clique)):
-        for j in xrange(i + 1, len(clique)):
-            links = []
-            #print str.format("Removing links {0} and {1}", clique[i], clique[j])
-            for k in xrange(0, len(clique)):
-                if k != i and k != j:
-                    links.append(clique[k])
+def CheckRoutingTable(tables, size, clique):
+    clique_len = len(clique)
+    links = {i : True for i in clique}
+    for i in xrange(0, clique_len):
+        for j in xrange(i + 1, clique_len):
+            links[clique[i]] = False
+            links[clique[j]] = False
             
-            ret = CheckConnectivity(tables, links)
+            ret = CheckConnectivity(tables, links, size)
             
+            links[clique[i]] = True
+            links[clique[j]] = True
             if not ret:
                 return False
     return True
@@ -72,11 +72,12 @@ def CombineIterators(size):
         routes.append(map(lambda y: list(y), x))
     carry = 0
     route = [0 for x in xrange(0, size)]
+    #route = [x * x + x for x in xrange(0, size)]
     routes_size = len(routes)
     while carry == 0:
         yield [routes[i] for i in route]
         carry = 1
-        i = 0
+        i = 1
         while carry == 1 and i < routes_size:
             carry = (route[i] + carry) / routes_size
             route[i] = (route[i] + 1) % routes_size
@@ -84,11 +85,13 @@ def CombineIterators(size):
 
 def Exhaustive(size):
     total = 0L
+    clique = GenerateClique(size)
     for routes in CombineIterators(size):
         total = total + 1
+        #if total % 1000000:
+            #print str.format("Explored {0} {1}", total, routes)
         #print "Checking new table"
-        ret = CheckRoutingTable(routes, size)
-        #print routes
+        ret = CheckRoutingTable(routes, size, clique)
         if ret:
             print str.format("Found good routing table {0}",routes)
     print str.format("Explored {0} total", total)
