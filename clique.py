@@ -98,6 +98,10 @@ def Exhaustive(size):
     return True
 
 if __name__ == "__main__":
-    if not Exhaustive(4):
+    import sys
+    size = 4
+    if len(sys.argv) > 1:
+        size = int(sys.argv[1])
+    if not Exhaustive(size):
         print "No path"
 
