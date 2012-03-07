@@ -69,7 +69,8 @@ def RoutesIterator(size):
 def CombineIterators(size):
     routes = []
     for x in RoutesIterator(size):
-        routes.append(map(lambda y: list(y), x))
+        if not any(map(lambda y: y[0] == y[1][0], zip(xrange(0, size), x))):
+            routes.append(map(lambda y: list(y), x))
     carry = 0
     route = [0 for x in xrange(0, size)]
     #route = [x * x + x for x in xrange(0, size)]
