@@ -89,16 +89,16 @@ def CheckTables(tables, size, clique, degrees, k):
             print  str.format("{0}", table)
 
 if __name__ == "__main__":
-    clique = [(0,1),(0,2),(0,4),(0,5),(1,2),(2,3),(3,4),(3,5),(4,5)]
-    degrees = [4, 2, 3, 3, 3, 3]
-    neighbours = {0:[0,1,2,4,5], 1:[0,1,2],2:[0,1,2,3],3:[2,3,4,5],4:[0,3,4,5],5:[0,3,4,5]}
+    clique = [(0,1),(0,3),(0,4),(0,7),(1,2),(2,3),(5,6),(6,7)]
+    degrees = [4, 2, 2, 2, 1, 1, 2, 2]
+    neighbours = {0:[0,1,3,4,7], 1:[0,1,2],2:[1,2,3],3:[0,2,3],4:[0,4],5:[5,6],6:[5,6,7],7:[0,6,7]}
     if len(sys.argv) <= 1:
-        CheckTables(CombineRouteIterators(6, neighbours), 6,clique,degrees,2)
+        CheckTables(CombineRouteIterators(8, neighbours), 8,clique,degrees,1)
     else:
         f = open(sys.argv[1])
         for line in f:
             table = eval(line)
-            if CheckRoutingTable(table, 5, clique, degrees, 1):
+            if CheckRoutingTable(table, 8, clique, degrees, 1):
                 print str.format("{0}", table)
     #for route_table in CombineRouteIterators(5, neighbours):
     #    print route_table
