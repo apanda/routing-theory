@@ -83,22 +83,22 @@ def CombineIterators(size):
             route[i] = (route[i] + 1) % routes_size
             i = i + 1
 
+import sys
 def Exhaustive(size):
     total = 0L
     clique = GenerateClique(size)
     for routes in CombineIterators(size):
         total = total + 1
-        #if total % 1000000:
-            #print str.format("Explored {0} {1}", total, routes)
+        if total % 100000000L == 0:
+            print >>sys.stderr, str.format("Explored {0}", total)
         #print "Checking new table"
         ret = CheckRoutingTable(routes, size, clique)
         if ret:
-            print str.format("Found good routing table {0}",routes)
+            print str.format("{0}",routes)
     print str.format("Explored {0} total", total)
     return True
 
 if __name__ == "__main__":
-    import sys
     size = 4
     if len(sys.argv) > 1:
         size = int(sys.argv[1])
