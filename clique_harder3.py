@@ -93,7 +93,7 @@ if __name__ == "__main__":
     degrees = [4, 2, 3, 3, 3, 3]
     neighbours = {0:[0,1,2,4,5], 1:[0,1,2],2:[0,1,2,3],3:[2,3,4,5],4:[0,3,4,5],5:[0,3,4,5]}
     if len(sys.argv) <= 1:
-        CheckTables(CombineRouteIterators(6, neighbours), 6,clique,degrees,2)
+        CheckTables(CombineRouteIterators(6, neighbours), 6,clique,degrees,1)
     else:
         f = open(sys.argv[1])
         for line in f:
