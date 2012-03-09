@@ -98,7 +98,7 @@ if __name__ == "__main__":
         f = open(sys.argv[1])
         for line in f:
             table = eval(line)
-            if CheckRoutingTable(table, 5, clique, degrees, 2):
+            if CheckRoutingTable(table, 6, clique, degrees, 2):
                 print str.format("{0}", table)
     #for route_table in CombineRouteIterators(5, neighbours):
     #    print route_table

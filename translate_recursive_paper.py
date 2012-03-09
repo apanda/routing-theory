@@ -3,6 +3,7 @@ from copy import deepcopy
 def CheckConnectivity(tables, size):
     #for origin in xrange(0, 4):
     #    for dest in xrange(origin + 1, 4):
+    nodes = ['d','11','3','1','2','10','4','5']
     dest = 0
     for origin in xrange(1, size):
         #print str.format("Routing between {0} and {1}", origin, dest)
@@ -30,12 +31,12 @@ def CheckConnectivity(tables, size):
                 current = next_hop
             if should_print:
                 pass
-                print ','.join(map(str, for_print))
+                print ','.join(map(lambda i:nodes[i], for_print))
     return True
 if __name__=="__main__":
     import sys
     t = open(sys.argv[1])
     for table in t:
-        CheckConnectivity(eval(table), int(sys.argv[2]))
+        CheckConnectivity(eval(table), 8)
         print
         print
