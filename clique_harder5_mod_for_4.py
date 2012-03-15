@@ -109,7 +109,7 @@ def CheckTables(tables, size, clique, graph, degrees, k, k_min):
 
 if __name__ == "__main__":
     #size = 8
-    size = 5
+    size = 4
     #clique = [(0,1),(1,2),(2,3),(3,4),(4,5),(5,6),(6,7),(0,7), (0,2),(0,3),(0,4),(0,5),(0,6)]
     #degrees = [7, 2,3,3,3,3,3,1]
     #neighbours = {0:[0,1,2,3,4,5,6,7], 1:[0,1,2],2:[0,1,2,3],3:[0,2,3,4],4:[0,3,4,5],5:[0,4,5,6],6:[0,5,6,7],7:[0,6,7]}
@@ -131,7 +131,7 @@ if __name__ == "__main__":
     G.add_nodes_from(xrange(0, size))
     G.add_edges_from(clique)
     if len(sys.argv) <= 1:
-        CheckTables(CombineRouteIterators(size, neighbours), size,clique, G,degrees, 4, 2)
+        CheckTables(CombineRouteIterators(size, neighbours), size,clique, G,degrees, 6, 2)
     else:
         f = open(sys.argv[1])
         for line in f:
