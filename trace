@@ -1,0 +1,44 @@
+1.0
+Checking 6
+Routing between 1 and 0
+Failed to go from 1 to 0
+Failed to go from 1 to 3
+Going from 1 (input port = 3) to 2
+Going from 2 (input port = 1) to 3
+Going from 3 (input port = 2) to 4
+Failed to go from 4 to 2
+Going from 4 (input port = 2) to 4
+Failed to go from 4 to 0
+Going from 4 (input port = 0) to 5
+Going to destination
+Done
+Routing between 2 and 0
+Failed to go from 3 to 0
+Going from 3 (input port = 0) to 2
+Going from 2 (input port = 3) to 2
+Failed to go from 2 to 0
+Failed to go from 2 to 4
+Failed to go from 2 to 5
+Going from 2 (input port = 5) to 1
+Failed to go from 1 to 4
+Going from 1 (input port = 4) to 5
+Going to destination
+Done
+Routing between 3 and 0
+Failed to go from 2 to 0
+Failed to go from 2 to 4
+Failed to go from 2 to 5
+Going from 2 (input port = 5) to 1
+Failed to go from 1 to 4
+Going from 1 (input port = 4) to 5
+Going to destination
+Done
+Routing between 4 and 0
+Failed to go from 4 to 0
+Going from 4 (input port = 0) to 5
+Going to destination
+Done
+Routing between 5 and 0
+Going to destination
+Done
+0 {0: 0, 1: 1, 2: 3, 3: 2, 4: 4, 5: 5}

@@ -68,6 +68,7 @@ def CheckRoutingTable(table, size, clique, graph, degrees, k):
     links = {i : True for i in clique}
     remove = itertools.combinations(xrange(0, clique_len), k)
     removed_degree = [0 for x in xrange(0, size)]
+    at_least_one = False
     for rem_links in remove:
         for rem_link in rem_links:
             links[clique[rem_link]] = False
@@ -75,6 +76,7 @@ def CheckRoutingTable(table, size, clique, graph, degrees, k):
             removed_degree[clique[rem_link][0]] = removed_degree[clique[rem_link][0]] + 1
             removed_degree[clique[rem_link][1]] = removed_degree[clique[rem_link][1]] + 1
         if nx.is_connected(graph):
+            at_least_one = True
             if not CheckConnectivity(table, links, size):
                 for rem_link in rem_links:
                     graph.add_edge(*clique[rem_link])
@@ -84,7 +86,7 @@ def CheckRoutingTable(table, size, clique, graph, degrees, k):
             removed_degree[clique[rem_link][0]] = removed_degree[clique[rem_link][0]] - 1
             removed_degree[clique[rem_link][1]] = removed_degree[clique[rem_link][1]] - 1
             links[clique[rem_link]] = True
-    return True
+    return at_least_one
 
 import sys
 def CheckTables(tables, size, clique, graph, degrees, k, k_min):
@@ -109,7 +111,7 @@ def CheckTables(tables, size, clique, graph, degrees, k, k_min):
 
 if __name__ == "__main__":
     #size = 8
-    size = 5
+    size = 6
     #clique = [(0,1),(1,2),(2,3),(3,4),(4,5),(5,6),(6,7),(0,7), (0,2),(0,3),(0,4),(0,5),(0,6)]
     #degrees = [7, 2,3,3,3,3,3,1]
     #neighbours = {0:[0,1,2,3,4,5,6,7], 1:[0,1,2],2:[0,1,2,3],3:[0,2,3,4],4:[0,3,4,5],5:[0,4,5,6],6:[0,5,6,7],7:[0,6,7]}
@@ -124,14 +126,16 @@ if __name__ == "__main__":
 
     #clique = [(0,1),(0,2),(0,4),(0,5),(1,2),(2,3),(2,5),(3,4),(4,5)]
     #neighbours = {0:[0,1,2,4,5], 1:[0,1,2],2:[0,1,2,3,5],3:[2,3,4],4:[0,3,4,5],5:[0,2,4,5]}
-    clique = list(itertools.combinations(xrange(0, size), 2))
-    neighbours = {x:range(0,size) for x in xrange(0,size)}
+    #clique = list(itertools.combinations(xrange(0, size), 2))
+    #neighbours = {x:range(0,size) for x in xrange(0,size)}
+    clique = [(0,1),(0,2),(1,2),(2,3),(3,5),(3,4),(4,5)]
+    neighbours = {0:[0,1,2], 1:[0,1,2], 2:[0,1,2,3], 3:[2,3,4,5], 4:[3,4,5], 5:[3,4,5]}
     degrees = [len(neighbours[i]) - 1 for i in xrange(0, size)]
     G = nx.Graph()
     G.add_nodes_from(xrange(0, size))
     G.add_edges_from(clique)
     if len(sys.argv) <= 1:
-        CheckTables(CombineRouteIterators(size, neighbours), size,clique, G,degrees, 4, 2)
+        CheckTables(CombineRouteIterators(size, neighbours), size,clique, G,degrees, 4, 1)
     else:
         f = open(sys.argv[1])
         for line in f:

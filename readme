@@ -3,3 +3,4 @@ clique_harder4 = 6b
 clique_harder5 = some 8 node stuff
 clique_harder: 5 node
 clique_harder2: Just an easier 5 node
+clique_harder_ordering: More ordering code
