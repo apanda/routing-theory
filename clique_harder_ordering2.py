@@ -143,7 +143,7 @@ if __name__ == "__main__":
     #clique = [(0,1),(0,2),(0,4),(0,5),(1,2),(2,3),(2,5),(3,4),(4,5)]
     #neighbours = {0:[0,1,2,4,5], 1:[0,1,2],2:[0,1,2,3,5],3:[2,3,4],4:[0,3,4,5],5:[0,2,4,5]}
     #size = 6 
-    size = 6
+    size = int(sys.argv[1])
     from copy import deepcopy
     universe = list(itertools.combinations(xrange(0, size), 2))
     #clique.remove((0,1))
@@ -152,7 +152,7 @@ if __name__ == "__main__":
     #clique.remove((1,3))
     #eremov,((0,2))
     ##clique.remove((0,3))
-    for i in xrange(6, len(universe)):
+    for i in xrange(1, len(universe)):
         print >>sys.stderr, str.format("Looking at i = {0}", i)
         for edges in itertools.combinations(universe, i):
             clique = deepcopy(universe)
