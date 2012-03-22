@@ -1,11 +1,12 @@
 #!/usr/bin/env pypy
 import networkx as nx
+
 def CheckConnectivity(tables, links, size, xlate):
     #for origin in xrange(0, 4):
     #    for dest in xrange(origin + 1, 4):
     dest = 0
     for origin in xrange(1, size):
-        #print str.format("Routing between {0} and {1}", origin, dest)
+        #print str.format("Routing between {0} and {1}", xlate[origin], dest)
         visited = []
         visited_links = []
         current = origin
@@ -36,12 +37,13 @@ def CheckConnectivity(tables, links, size, xlate):
             else:
                 #print str.format("Failed to go from {1} to {0}", xlate[next_hop], xlate[current])
                 if edge in visited_links:
-                    #print ','.join(for_print)
+                    print ','.join(for_print)
                     return False
                 for_print.append(str(next_hop))
                 visited_links.append(edge)
                 inport = next_hop
         #print "Done"
+        #print 
     return True
 
 def RoutesIterator(neighbors):
@@ -72,7 +74,7 @@ def CombineRouteIterators(size, neighbors):
             i = i + 1
 
 import itertools
-def CheckRoutingTable(table, size, clique, graph,  k, xlate):
+def CheckRoutingTable(table, size, clique, graph, k, xlate):
     clique_len = len(clique)
     links = {i : True for i in clique}
     if k == 0:
@@ -83,6 +85,7 @@ def CheckRoutingTable(table, size, clique, graph,  k, xlate):
     remove = itertools.combinations(xrange(0, clique_len), k)
     for rem_links in remove:
         for rem_link in rem_links:
+            #print str.format("Failing {0}", clique[rem_link])
             links[clique[rem_link]] = False
             graph.remove_edge(*clique[rem_link])
         if nx.is_connected(graph):
@@ -114,11 +117,11 @@ def CheckTables(tables, size, clique, graph, k, k_min, xlate):
                 break
         if found > max_so_far:
             max_so_far = found
+            #print >>sys.stderr, str.format("Maximum so far {0}", found)
         if found >= k_min:
             pass
             #print  str.format("{1}: {0}", table, found)
         return found
-
 def GenerateTable(current, global_order, size):
     table = [0 for x in xrange(0, size)]
     for k,v in global_order.iteritems():
@@ -127,31 +130,15 @@ def GenerateTable(current, global_order, size):
     table[current] = 0
     return table
 if __name__ == "__main__":
-    #size = 8
-    #clique = [(0,1),(1,2),(2,3),(3,4),(4,5),(5,6),(6,7),(0,7), (0,2),(0,3),(0,4),(0,5),(0,6)]
-    #degrees = [7, 2,3,3,3,3,3,1]
-    #neighbours = {0:[0,1,2,3,4,5,6,7], 1:[0,1,2],2:[0,1,2,3],3:[0,2,3,4],4:[0,3,4,5],5:[0,4,5,6],6:[0,5,6,7],7:[0,6,7]}
-    #clique = [(0,1),(0,3),(0,4),(0,7),(1,2),(2,3),(5,6),(6,7)]
-    #neighbours = {0:[0,1,3,4,5],1:[0,1,2],2:[1,2,3],3:[0,2,3],4:[0,4],5:[5,6],6:[5,6,7],7:[0,6,7]}
-    # PODC graph
-    #clique = [(0,1),(1,2),(2,3),(3,4),(4,5),(5,6),(3,6),(3,7)]
-    #neighbours = {0:[0,1],1:[0,1,2], 2:[1,2,3],3:[2,3,4,6,7], 4:[3,4,5], 5:[4,5,6],6:[3,5,6],7:[3,7]}
-    # something
-    #clique = [(0,1),(0,2),(0,4),(0,5),(1,2),(2,3),(3,4),(3,5),(4,5)]
-    #neighbours = {0:[0,1,2,4,5], 1:[0,1,2],2:[0,1,2,3],3:[2,3,4,5],4:[0,3,4,5],5:[0,3,4,5]}
-
-    #clique = [(0,1),(0,2),(0,4),(0,5),(1,2),(2,3),(2,5),(3,4),(4,5)]
-    #neighbours = {0:[0,1,2,4,5], 1:[0,1,2],2:[0,1,2,3,5],3:[2,3,4],4:[0,3,4,5],5:[0,2,4,5]}
-    #size = 6 
     size = int(sys.argv[1])
     from copy import deepcopy
-    universe = list(itertools.combinations(xrange(0, size), 2))
-    #clique.remove((0,1))
-    #clique.remove((2,3))
-    #clique.remove((4,5))
-    #clique.remove((1,3))
-    #eremov,((0,2))
-    ##clique.remove((0,3))
+    if len(sys.argv) > 2:
+        universe = eval(sys.argv[2])
+    else:
+        universe = list(itertools.combinations(xrange(0, size), 2))
+    global_order = {(x + 1): (((x+1) % (size - 1)) + 1) for x in xrange(0, size - 1)}
+    routing_table = {x: GenerateTable(x, global_order, size) for x in xrange(1, size)}
+    del global_order
     for i in xrange(1, len(universe)):
         print >>sys.stderr, str.format("Looking at i = {0}", i)
         for edges in itertools.combinations(universe, i):
@@ -159,20 +146,6 @@ if __name__ == "__main__":
             for edge in edges:
                 clique.remove(edge)
             neighbours = {x:range(0,size) for x in xrange(0,size)}
-            #neighbours[0].remove(1)
-            #neighbours[1].remove(0)
-            #neighbours[2].remove(3)
-            #neighbours[3].remove(2)
-            #neighbours[4].remove(5)
-            #neighbours[5].remove(4)
-            #neighbours[3].remove(1)
-            #neighbours[1].remove(3)
-            #neighbours[0].remove(2)
-            #neighbours[2].remove(0)
-            #neighbours[0].remove(3)
-            #neighbours[3].remove(0)
-            #clique = [(1,2),(2,3),(3,4),(4,5),(1,5),(0,5)]
-            #neighbours = {0:[0,5], 1:[1,2,5], 2:[1,2,3], 3:[2,3,4], 4:[3,4,5], 5:[0,1,4,5]}
 
             G = nx.Graph()
             G.add_nodes_from(xrange(0, size))
@@ -180,31 +153,19 @@ if __name__ == "__main__":
             if not nx.is_connected(G):
                 continue
             mincut = min(map(lambda x: nx.min_cut(G, x[0], x[1]), itertools.combinations(xrange(0, size), 2)))
-            global_order = {(x + 1): (((x+1) % (size - 1)) + 1) for x in xrange(0, size - 1)}
-            routing_table = {x: GenerateTable(x, global_order, size) for x in xrange(1, size)}
-            tested = 0
-            passed = 0
-            #xlate = {0:0,1:1, 2:3, 3:2, 4:4, 5:5}
-            #ret = CheckTables([routing_table], size, clique, G, mincut - 1, len(clique) - 2, xlate)
-            #tested = tested + 1
-            #if ret >= mincut - 1:
-            #    passed = passed + 1
-            #    print str.format("{0} {1}", ret, xlate)
-            #sys.exit(1)
+            if len(sys.argv) > 3:
+                global_order = eval(sys.argv[3])
+            else:
+                global_order = {(x + 1): (((x+1) % (size - 1)) + 1) for x in xrange(0, size - 1)}
+                global_order[0] = 0
             failed_any = False
-            for perm in itertools.permutations(xrange(1, size)):
-                perm_l = list(perm)
-                xlate = {x: perm[x - 1] for x in  xrange(1, size)}
-                xlate[0] = 0
-                ret = CheckTables([routing_table], size, clique, G,  mincut - 1, mincut + 1, xlate)
-                tested = tested + 1
-                if ret >= mincut - 1:
-                    passed = passed + 1
-                    #print str.format("{0} {1}", ret, xlate)
-                else:
-                    print str.format("FAILURE {2} {3} {0} {1}", clique, [xlate[k] for k in xrange(0, size)], mincut, ret)
-                    print >>sys.stderr, "Found failure"
-                    failed_any = True
-            if failed_any:
-                print str.format("Passed {0} out of {1}", passed, tested)
+            ret = CheckTables([routing_table], size, clique, G,  mincut - 1, mincut + 1, global_order)
+            if ret >= mincut - 1:
+                pass
+                #print str.format("{0} {1}", ret, xlate)
+            else:
+                print str.format("FAILURE {2} {3} {0} {1}", clique, [global_order[k] for k in xrange(0, size)], mincut, ret)
+                print >>sys.stderr, "Found failure"
+                failed_any = True
+                sys.exit(1)
 
