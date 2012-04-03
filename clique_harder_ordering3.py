@@ -180,9 +180,9 @@ if __name__ == "__main__":
         tested = tested + 1
         if ret >= mincut - 1:
             passed = passed + 1
-            #print str.format("{0} {1}", ret, [xlate[a] for a in xrange(0, size)])
-        else:
             print str.format("{0} {1}", ret, [xlate[a] for a in xrange(0, size)])
+        else:
+            #print str.format("{0} {1}", ret, [xlate[a] for a in xrange(0, size)])
             pass
     print str.format("Tested/Passed {0} / {1}", tested, passed)
         
