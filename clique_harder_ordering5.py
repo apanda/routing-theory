@@ -79,7 +79,7 @@ def CheckRoutingTable(table, size, clique, graph, k, xlate):
     links = {i : True for i in clique}
     if k == 0:
         if not CheckConnectivity(table, links, size, xlate):
-            return False
+            return (False, [])
         else:
             return True
     remove = itertools.combinations(xrange(0, clique_len), k)
@@ -94,7 +94,8 @@ def CheckRoutingTable(table, size, clique, graph, k, xlate):
                 for rem_link in rem_links:
                     #print str.format("Link: {0}", clique[rem_link])
                     graph.add_edge(*clique[rem_link])
-                return False
+                #print str.format("Failing with failed links: {0}", map(lambda a: clique[a], rem_links))
+                return (False, map(lambda a: clique[a], rem_links))
         for rem_link in rem_links:
             graph.add_edge(*clique[rem_link])
             links[clique[rem_link]] = True
@@ -104,6 +105,10 @@ import sys
 def CheckTables(tables, size, clique, graph, k, k_min, xlate):
     count = 0L
     max_so_far = -1
+    min_cut_so_far = len(clique)
+    min_edges = []
+    first_fail = -1
+    assert len(tables) == 1
     for table in tables:
         count = count + 1
         if count % 1000000 == 0:
@@ -111,9 +116,12 @@ def CheckTables(tables, size, clique, graph, k, k_min, xlate):
         found = -1
         for k_temp in xrange(0, k + 1):
             val = CheckRoutingTable(table, size, clique, graph, k_temp, xlate)
-            if val:
+            if val == True:
                 found = k_temp
             else:
+                if min_cut_so_far > k_temp:
+                    min_edges = val[1]
+                    min_cut_so_far = k_temp
                 break
         if found > max_so_far:
             max_so_far = found
@@ -121,7 +129,7 @@ def CheckTables(tables, size, clique, graph, k, k_min, xlate):
         if found >= k_min:
             pass
             #print  str.format("{1}: {0}", table, found)
-        return found
+        return (found, min_edges)
 def GenerateTable(current, global_order, size):
     table = [0 for x in xrange(0, size)]
     for k,v in global_order.iteritems():
@@ -129,6 +137,7 @@ def GenerateTable(current, global_order, size):
     table[0] = ((current) % (size - 1)) + 1
     table[current] = 0
     return table
+
 if __name__ == "__main__":
     size = int(sys.argv[1])
     from copy import deepcopy
@@ -140,44 +149,45 @@ if __name__ == "__main__":
     routing_table = {x: GenerateTable(x, global_order, size) for x in xrange(1, size)}
     del global_order
     use_input = True
-    for i in xrange(size / 2, len(universe)):
-        print >>sys.stderr, str.format("Looking at i = {0}", i)
-        for edges in itertools.combinations(universe, i):
-            clique = deepcopy(universe)
-            for edge in edges:
-                clique.remove(edge)
-            neighbours = {x:range(0,size) for x in xrange(0,size)}
+    #if len(sys.argv) > 2:
+    #    start = int(sys.argv[2])
+    #else:
+    #    start = len(universe)
+    #for i in xrange(start, 1, -1):
+        #print >>sys.stderr, str.format("Looking at i = {0}", i)
+        #failed_any = False
+        #tested_any = False
+        #for edges in itertools.combinations(universe, i):
+    clique = deepcopy(universe)
+    neighbours = {x:range(0,size) for x in xrange(0,size)}
 
-            G = nx.Graph()
-            G.add_nodes_from(xrange(0, size))
-            G.add_edges_from(clique, capacity = 1.0)
-            if not nx.is_connected(G):
-                continue
-            mincut = min(map(lambda x: nx.min_cut(G, x[0], x[1]), itertools.combinations(xrange(0, size), 2)))
-            failed_any = False
-
-            levels = []
-            if use_input and len(sys.argv) > 3:
-                global_order = [eval(sys.argv[3])]
-                use_input = False
-            else:
-                lengths = nx.all_pairs_dijkstra_path_length(G)
-                to_dest = {x: lengths[x][0] for x in xrange(0, size)}
-                sorted_dest = sorted(to_dest.iteritems(), key=lambda x: x[1])
-                max_dist = sorted_dest[-1][1]
-                for dists in xrange(0, max_dist + 1):
-                    levels.append(map(lambda x: x[0], filter(lambda x: x[1] == dists, sorted_dest)))
-                orders = itertools.product(*map(itertools.permutations, levels))
-                global_order = map(lambda x: list(itertools.chain(*x)), orders)
-
-            ret = map(lambda go: CheckTables([routing_table], size, clique, G,  mincut - 1, mincut + 1, go) >= mincut - 1, global_order)
-            if any(ret):
-                pass
-                #print str.format("{0} {1}", ret, xlate)
-            else:
-                print str.format("FAILURE {2} {3} {0}", clique, 0, mincut, ret)
-                print global_order
-                print levels
-                print >>sys.stderr, "Found failure"
-                failed_any = True
-
+    G = nx.Graph()
+    G.add_nodes_from(xrange(0, size))
+    G.add_edges_from(clique, capacity = 1.0)
+    if not nx.is_connected(G):
+        print "Not connected"
+        sys.exit(-1)
+    tested_any = True
+    mincut = min(map(lambda x: nx.min_cut(G, x[0], x[1]), itertools.combinations(xrange(0, size), 2)))
+    levels = []
+    if use_input and len(sys.argv) > 3:
+        global_order = [eval(sys.argv[3])]
+        use_input = False
+    else:
+        lengths = nx.all_pairs_dijkstra_path_length(G)
+        to_dest = {x: lengths[x][0] for x in xrange(0, size)}
+        sorted_dest = sorted(to_dest.iteritems(), key=lambda x: x[1])
+        max_dist = sorted_dest[-1][1]
+        for dists in xrange(0, max_dist + 1):
+            levels.append(map(lambda x: x[0], filter(lambda x: x[1] == dists, sorted_dest)))
+        orders = itertools.product(*map(itertools.permutations, levels))
+        global_order = map(lambda x: list(itertools.chain(*x)), orders)
+    #print >>sys.stderr, levels
+    ret = map(lambda go: CheckTables([routing_table], size, clique, G,  mincut, mincut + 2, go), global_order)
+    if any(map(lambda a: a[0] >= mincut - 1, ret)):
+        for cut, order in zip(map(lambda g:g[1], ret), global_order):
+            if len(cut) > 0:
+                print str.format("{3} {0} {1} {2}", clique, order, cut, mincut)
+    else:
+        for cut, order in zip(map(lambda g:g[1], ret), global_order):
+            print str.format("FAIL {0} {1} {2}", clique, order, cut)

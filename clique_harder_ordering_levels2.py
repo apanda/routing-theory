@@ -79,6 +79,7 @@ def CheckRoutingTable(table, size, clique, graph, k, xlate):
     links = {i : True for i in clique}
     if k == 0:
         if not CheckConnectivity(table, links, size, xlate):
+            print >>sys.stderr, "Failing without any failed links"
             return False
         else:
             return True
@@ -132,16 +133,22 @@ def GenerateTable(current, global_order, size):
 if __name__ == "__main__":
     size = int(sys.argv[1])
     from copy import deepcopy
-    if len(sys.argv) > 2:
-        universe = eval(sys.argv[2])
-    else:
-        universe = list(itertools.combinations(xrange(0, size), 2))
+    #if len(sys.argv) > 2:
+    #    universe = eval(sys.argv[2])
+    #else:
+    universe = list(itertools.combinations(xrange(0, size), 2))
     global_order = {(x + 1): (((x+1) % (size - 1)) + 1) for x in xrange(0, size - 1)}
     routing_table = {x: GenerateTable(x, global_order, size) for x in xrange(1, size)}
     del global_order
     use_input = True
-    for i in xrange(size / 2, len(universe)):
+    if len(sys.argv) > 2:
+        start = int(sys.argv[2])
+    else:
+        start = len(universe)
+    for i in xrange(start, 1, -1):
         print >>sys.stderr, str.format("Looking at i = {0}", i)
+        failed_any = False
+        tested_any = False
         for edges in itertools.combinations(universe, i):
             clique = deepcopy(universe)
             for edge in edges:
@@ -153,9 +160,8 @@ if __name__ == "__main__":
             G.add_edges_from(clique, capacity = 1.0)
             if not nx.is_connected(G):
                 continue
+            tested_any = True
             mincut = min(map(lambda x: nx.min_cut(G, x[0], x[1]), itertools.combinations(xrange(0, size), 2)))
-            failed_any = False
-
             levels = []
             if use_input and len(sys.argv) > 3:
                 global_order = [eval(sys.argv[3])]
@@ -169,7 +175,7 @@ if __name__ == "__main__":
                     levels.append(map(lambda x: x[0], filter(lambda x: x[1] == dists, sorted_dest)))
                 orders = itertools.product(*map(itertools.permutations, levels))
                 global_order = map(lambda x: list(itertools.chain(*x)), orders)
-
+            #print >>sys.stderr, levels
             ret = map(lambda go: CheckTables([routing_table], size, clique, G,  mincut - 1, mincut + 1, go) >= mincut - 1, global_order)
             if any(ret):
                 pass
@@ -180,4 +186,8 @@ if __name__ == "__main__":
                 print levels
                 print >>sys.stderr, "Found failure"
                 failed_any = True
+                break
+        if tested_any and not failed_any:
+            pass
+            #break
 

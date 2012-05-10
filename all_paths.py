@@ -1,6 +1,5 @@
 #!/usr/bin/env pypy
 import networkx as nx
-
 def CheckConnectivity(tables, links, size, xlate):
     #for origin in xrange(0, 4):
     #    for dest in xrange(origin + 1, 4):
@@ -37,13 +36,11 @@ def CheckConnectivity(tables, links, size, xlate):
             else:
                 #print str.format("Failed to go from {1} to {0}", xlate[next_hop], xlate[current])
                 if edge in visited_links:
-                    print ','.join(for_print)
+                    #print ','.join(for_print)
                     return False
                 for_print.append(str(next_hop))
                 visited_links.append(edge)
                 inport = next_hop
-        #print "Done"
-        #print 
     return True
 
 def RoutesIterator(neighbors):
@@ -85,7 +82,6 @@ def CheckRoutingTable(table, size, clique, graph, k, xlate):
     remove = itertools.combinations(xrange(0, clique_len), k)
     for rem_links in remove:
         for rem_link in rem_links:
-            #print str.format("Failing {0}", clique[rem_link])
             links[clique[rem_link]] = False
             graph.remove_edge(*clique[rem_link])
         if nx.is_connected(graph):
@@ -117,67 +113,25 @@ def CheckTables(tables, size, clique, graph, k, k_min, xlate):
                 break
         if found > max_so_far:
             max_so_far = found
-            #print >>sys.stderr, str.format("Maximum so far {0}", found)
         if found >= k_min:
             pass
             #print  str.format("{1}: {0}", table, found)
         return found
+
 def GenerateTable(current, global_order, size):
     table = [0 for x in xrange(0, size)]
     for k,v in global_order.iteritems():
         table[k] = v
     table[0] = ((current) % (size - 1)) + 1
-    table[current] = 0
     return table
 if __name__ == "__main__":
     size = int(sys.argv[1])
-    from copy import deepcopy
-    if len(sys.argv) > 2:
-        universe = eval(sys.argv[2])
-    else:
-        universe = list(itertools.combinations(xrange(0, size), 2))
-    global_order = {(x + 1): (((x+1) % (size - 1)) + 1) for x in xrange(0, size - 1)}
-    routing_table = {x: GenerateTable(x, global_order, size) for x in xrange(1, size)}
-    del global_order
-    use_input = True
-    for i in xrange(size / 2, len(universe)):
-        print >>sys.stderr, str.format("Looking at i = {0}", i)
-        for edges in itertools.combinations(universe, i):
-            clique = deepcopy(universe)
-            for edge in edges:
-                clique.remove(edge)
-            neighbours = {x:range(0,size) for x in xrange(0,size)}
-
-            G = nx.Graph()
-            G.add_nodes_from(xrange(0, size))
-            G.add_edges_from(clique, capacity = 1.0)
-            if not nx.is_connected(G):
-                continue
-            mincut = min(map(lambda x: nx.min_cut(G, x[0], x[1]), itertools.combinations(xrange(0, size), 2)))
-            failed_any = False
-
-            levels = []
-            if use_input and len(sys.argv) > 3:
-                global_order = [eval(sys.argv[3])]
-                use_input = False
-            else:
-                lengths = nx.all_pairs_dijkstra_path_length(G)
-                to_dest = {x: lengths[x][0] for x in xrange(0, size)}
-                sorted_dest = sorted(to_dest.iteritems(), key=lambda x: x[1])
-                max_dist = sorted_dest[-1][1]
-                for dists in xrange(0, max_dist + 1):
-                    levels.append(map(lambda x: x[0], filter(lambda x: x[1] == dists, sorted_dest)))
-                orders = itertools.product(*map(itertools.permutations, levels))
-                global_order = map(lambda x: list(itertools.chain(*x)), orders)
-
-            ret = map(lambda go: CheckTables([routing_table], size, clique, G,  mincut - 1, mincut + 1, go) >= mincut - 1, global_order)
-            if any(ret):
-                pass
-                #print str.format("{0} {1}", ret, xlate)
-            else:
-                print str.format("FAILURE {2} {3} {0}", clique, 0, mincut, ret)
-                print global_order
-                print levels
-                print >>sys.stderr, "Found failure"
-                failed_any = True
-
+    clique = eval(sys.argv[2]) #[(0, 3), (0, 4), (0, 5), (1, 2), (1, 4), (1, 5), (2, 4), (2, 5), (3, 4), (3, 5), (4, 5)] 
+    G = nx.Graph()
+    G.add_nodes_from(xrange(0, size))
+    G.add_edges_from(clique, capacity = 1.0)
+    mincut = min(map(lambda x: nx.min_cut(G, x[0], x[1]), itertools.combinations(xrange(0, size), 2)))
+    print mincut
+    print nx.cycle_basis(G)
+    print [i for i in nx.dfs_edges(G, 0)]
+    print [i for i in nx.dfs_edges(G, 1)]
