@@ -4,3 +4,10 @@ clique_harder5 = some 8 node stuff
 clique_harder: 5 node
 clique_harder2: Just an easier 5 node
 clique_harder_ordering: More ordering code
+clique_harder_ordering1: Print trace
+clique_harder_ordering3: All working orderings
+clique_harder_ordering5: Mincut
+clique_harder_ordering_levels: Forward search level based orderings
+clique_harder_ordering_levels2: Reverse search level based orderings
+clique_harder_ordering_levels3: Mincut information for working ordering using levels
+clique_harder_ordering_levels4: Mincut information for dead orderings using levels
